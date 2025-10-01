@@ -1,0 +1,37 @@
+{
+  "name": "@xmrt/integration-core",
+  "version": "1.0.0",
+  "description": "Central coordination hub for the XMRT Ecosystem V2 monorepo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "xmrt",
+    "integration",
+    "coordination",
+    "monero",
+    "dao",
+    "blockchain",
+    "mobile-mining"
+  ],
+  "author": "Manus AI",
+  "license": "MIT",
+  "dependencies": {
+    "events": "^3.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevGruGold/XMRT_EcosystemV2.git",
+    "directory": "packages/integration-core"
+  }
+}
