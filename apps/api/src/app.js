@@ -6,6 +6,7 @@ const compression = require('compression');
 const cors = require('cors');
 const passport = require('passport');
 const httpStatus = require('http-status');
+const path = require('path');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
@@ -53,9 +54,32 @@ if (config.env === 'production') {
 // v1 api routes
 app.use('/v1', routes);
 
+// Direct API routes for frontend compatibility
+const xmrtRoute = require('./routes/xmrt.route');
+app.use('/api', xmrtRoute);
+
+// Serve static files from the frontend build
+const frontendPath = path.join(__dirname, '../public');
+app.use(express.static(frontendPath));
+
+// Serve the React app for all non-API routes
+app.get('*', (req, res) => {
+  // Don't serve the React app for API routes
+  if (req.path.startsWith('/api') || req.path.startsWith('/v1')) {
+    return res.status(httpStatus.NOT_FOUND).json({ message: 'API endpoint not found' });
+  }
+  
+  // Serve the React app
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  if (req.path.startsWith('/api') || req.path.startsWith('/v1')) {
+    next(new ApiError(httpStatus.NOT_FOUND, 'API endpoint not found'));
+  } else {
+    next();
+  }
 });
 
 // convert error to ApiError, if needed

@@ -39,8 +39,12 @@ const XMRTDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // API base URL
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+  // API base URL - use current domain for production
+  const API_BASE = process.env.REACT_APP_API_URL || (
+    window.location.hostname === 'localhost' 
+      ? 'http://localhost:3001' 
+      : window.location.origin
+  );
 
   useEffect(() => {
     fetchDashboardData();

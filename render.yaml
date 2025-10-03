@@ -1,0 +1,70 @@
+services:
+  # Main web service (API + Frontend)
+  - type: web
+    name: xmrt-ecosystem-v2
+    env: node
+    plan: starter
+    buildCommand: |
+      # Install dependencies for API
+      cd apps/api && npm install
+      # Install dependencies for frontend
+      cd ../web/frontend && npm install
+      # Build frontend
+      npm run build
+      # Copy built frontend to API public directory
+      mkdir -p ../../api/public
+      cp -r dist/* ../../api/public/
+    startCommand: node apps/api/src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URL
+        fromDatabase:
+          name: xmrt-mongodb
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRATION_MINUTES
+        value: 30
+      - key: JWT_REFRESH_EXPIRATION_DAYS
+        value: 30
+      - key: SUPABASE_URL
+        fromService:
+          type: pserv
+          name: xmrt-supabase
+          property: host
+      - key: SUPABASE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+
+  # Database service
+  - type: pserv
+    name: xmrt-mongodb
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile.mongo
+    disk:
+      name: xmrt-data
+      mountPath: /data/db
+      sizeGB: 1
+
+databases:
+  - name: xmrt-postgres
+    databaseName: xmrt_ecosystem
+    user: xmrt_user
+    plan: starter
+
+# Static site for frontend (alternative deployment)
+# - type: static
+#   name: xmrt-frontend
+#   buildCommand: cd apps/web/frontend && npm install && npm run build
+#   staticPublishPath: apps/web/frontend/dist
+#   envVars:
+#     - key: REACT_APP_API_URL
+#       value: https://xmrt-ecosystem-v2.onrender.com
